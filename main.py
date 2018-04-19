@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, abort, redirect, url_for, request
+from flask import Flask, render_template, abort, redirect, url_for, request, send_from_directory
 from werkzeug.utils import secure_filename
 from model import flow2code
 app = Flask(__name__)
@@ -55,6 +55,9 @@ def flow(img_path):
     img_path=img_path
   )
 
+@app.route('/img/<path>')
+def send_img(path):
+  return send_from_directory(os.path.join(os.getcwd(), UPLOAD_FOLDER), path)
 
 if __name__ == "__main__":
   app.run(host="0.0.0.0", debug=True)
