@@ -86,6 +86,7 @@
       var imgWidth = eval("{{ img_width }}");
       var imgHeight = eval("{{ img_height }}");
       var imgPath = "{{ img_path }}";
+      var visionAPIToken = "{{ vision_api_token }}";
 
       tokens = `['<START>', 'while', 'statement', 'end', 'statement', 'if', 'statement', 'end', '<END>']`;
       positions = `[[ 86.835884,   30.822842 ],
@@ -100,31 +101,6 @@
       
       tokens = eval(tokens.split("&#39;").join("'"));
       positions = eval(positions);
-
-      function showData() {
-        var txt = "";
-        var tabsize = 0;
-        for (var i = 0; i < tokens.length; i++) {
-          if (tokens[i] == 'end') tabsize--;
-          for (var j = 0; j < tabsize; j++) txt += "&nbsp;&nbsp;&nbsp;&nbsp;";
-          if (['if', 'while'].indexOf(tokens[i]) >= 0) tabsize++;
-          txt += tokens[i].replace('<', '&lt;').replace('>', '&gt;') + '<br>';
-        }
-
-        $('.tokens-result-formatted').html(txt);
-
-        txt = '';
-        for (var i = 0; i < positions.length; i++) {
-          txt += '<tr>';
-          txt += '<td>' + (i + 1) + '</td>';
-          txt += '<td>' + tokens[i].replace('<', '&lt;').replace('>', '&gt;') + '</td>';
-          txt += '<td>' + Math.round(positions[i][0] * 1000000) / 1000000 + '</td>';
-          txt += '<td>' + Math.round(positions[i][1] * 1000000) / 1000000 + '</td>';
-          txt += '</tr>';
-        }
-
-        $('.positions-result-formatted .table tbody').html(txt);
-      }
 
       $(function(){
         showData();
@@ -157,10 +133,40 @@
           $(".positions-result-formatted").show();
         });
 
-        shwoImagePosition();
-      })
+        showImagePosition();
+        OCR();
+      });
 
-      function shwoImagePosition() {
+      function showData() {
+        var txt = "";
+        var tabsize = 0;
+        for (var i = 0; i < tokens.length; i++) {
+          if (tokens[i] == 'end') tabsize--;
+          for (var j = 0; j < tabsize; j++) txt += "&nbsp;&nbsp;&nbsp;&nbsp;";
+          if (['if', 'while'].indexOf(tokens[i]) >= 0) tabsize++;
+          txt += tokens[i].replace('<', '&lt;').replace('>', '&gt;') + '<br>';
+        }
+
+        $('.tokens-result-formatted').html(txt);
+
+        txt = '';
+        for (var i = 0; i < positions.length; i++) {
+          txt += '<tr>';
+          txt += '<td>' + (i + 1) + '</td>';
+          txt += '<td>' + tokens[i].replace('<', '&lt;').replace('>', '&gt;') + '</td>';
+          txt += '<td>' + Math.round(positions[i][0] * 1000000) / 1000000 + '</td>';
+          txt += '<td>' + Math.round(positions[i][1] * 1000000) / 1000000 + '</td>';
+          txt += '</tr>';
+        }
+
+        $('.positions-result-formatted .table tbody').html(txt);
+      }
+
+      function OCR() {
+
+      }
+
+      function showImagePosition() {
         var svg = d3.select('#image-position');
 
         var aspect = imgWidth / imgHeight;
@@ -208,7 +214,6 @@
           .attr("cx", function(d) { return d[0] / imgWidth * width; })
           .attr("cy", function(d) { return d[1] / imgHeight * height; })
           .style("fill", "#e81700");
-        
       }
     </script>
   </body>

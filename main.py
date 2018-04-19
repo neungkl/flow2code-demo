@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, abort, redirect, url_for, request, send_from_directory
 from werkzeug.utils import secure_filename
+from credential import VISION_API_TOKEN
 from model import flow2code
 app = Flask(__name__)
 
@@ -54,7 +55,8 @@ def flow(img_path):
     positions=result["positions"].tolist(),
     img_width=result["img_width"],
     img_height=result["img_height"],
-    img_path=img_path
+    img_path=img_path,
+    vision_api_token=VISION_API_TOKEN
   )
 
 @app.route('/img/<path>')
