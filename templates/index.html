@@ -8,8 +8,8 @@
     </nav>
     <div class="container mt-4">
       <div class="row">
-        <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
-          <div class="md-6">
+        <div class="col">
+          <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
             <div class="mb-2">Upload Flowchart Image:</div>
             <div class="input-group mb-3">
               <div class="custom-file">
@@ -18,8 +18,12 @@
               </div>
             </div>
             <input type="submit" class="btn btn-primary" value="Upload">
-          </div>
-        </form>
+          </form>
+        </div>
+        <div class="col">
+          <div>View File List:</div>
+          <a href="/list">File List</a>
+        </div>
       </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
