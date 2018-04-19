@@ -2,7 +2,7 @@
   <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <style>
-      .main-img {
+      .main-img, .image-position-wrapper svg {
         border: 1px solid #333;
       }
       .border-area {
@@ -21,6 +21,10 @@
         <div class="col">
           <div class="mb-2"><b>Original Image</b></div>
           <img src="/img/{{ img_path }}" class="img-fluid main-img">
+          <div class="mt-3 mb-2"><b>Original Image + Predicted Positions</b></div>
+          <div class="image-position-wrapper">
+            <svg id="image-position"></svg>
+          </div>
         </div>
         <div class="col">
           <div class="mb-1"><b>Tokens Prediction</b></div>
@@ -79,20 +83,32 @@
     <script>
       var tokens = "{{ tokens }}";
       var positions = "{{ positions }}";
+      var imgWidth = eval("{{ img_width }}");
+      var imgHeight = eval("{{ img_height }}");
+      var imgPath = "{{ img_path }}";
+
+      tokens = `['<START>', 'while', 'statement', 'end', 'statement', 'if', 'statement', 'end', '<END>']`;
+      positions = `[[ 86.835884,   30.822842 ],
+ [ 94.26746,   138.4611   ],
+ [ 93.41691,   241.86961  ],
+ [ -1.2381954,  -1.3295772],
+ [273.97653,   145.54604  ],
+ [268.79132,   250.06036  ],
+ [272.19553,   353.23572  ],
+ [ -1.19777,    -1.0979531],
+ [253.61102,   452.9816   ]]`;
       
       tokens = eval(tokens.split("&#39;").join("'"));
       positions = eval(positions);
-
-      console.log(tokens, positions);
 
       function showData() {
         var txt = "";
         var tabsize = 0;
         for (var i = 0; i < tokens.length; i++) {
-          if ($.inArray(tokens[i], ['if', 'while'])) tabsize++;
           if (tokens[i] == 'end') tabsize--;
-          for (var j = 0; j < tabsize; j++) txt += "\t";
-          txt += tokens[i] + '<br>';
+          for (var j = 0; j < tabsize; j++) txt += "&nbsp;&nbsp;&nbsp;&nbsp;";
+          if (['if', 'while'].indexOf(tokens[i]) >= 0) tabsize++;
+          txt += tokens[i].replace('<', '&lt;').replace('>', '&gt;') + '<br>';
         }
 
         $('.tokens-result-formatted').html(txt);
@@ -101,7 +117,7 @@
         for (var i = 0; i < positions.length; i++) {
           txt += '<tr>';
           txt += '<td>' + (i + 1) + '</td>';
-          txt += '<td>' + tokens[i] + '</td>';
+          txt += '<td>' + tokens[i].replace('<', '&lt;').replace('>', '&gt;') + '</td>';
           txt += '<td>' + Math.round(positions[i][0] * 1000000) / 1000000 + '</td>';
           txt += '<td>' + Math.round(positions[i][1] * 1000000) / 1000000 + '</td>';
           txt += '</tr>';
@@ -140,7 +156,60 @@
           $(".positions-result-raw").hide();
           $(".positions-result-formatted").show();
         });
+
+        shwoImagePosition();
       })
+
+      function shwoImagePosition() {
+        var svg = d3.select('#image-position');
+
+        var aspect = imgWidth / imgHeight;
+        var targetWidth = Math.min($(".image-position-wrapper").width(), imgWidth);
+
+        var width = targetWidth;
+        var height = targetWidth / aspect;
+
+        svg.attr("width", width);
+        svg.attr("height", height);
+
+        svg.append('svg:image')
+          .attr('xlink:href', '/img/' + imgPath)
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('width', width)
+          .attr('height', height);
+
+        svg.selectAll(".text").data(positions)
+        .enter().append("text")
+          .attr("class", "text")
+          .attr("x", function(d) { return d[0] / imgWidth * width + 4; })
+          .attr("y", function(d) { return d[1] / imgHeight * height - 4; })
+          .style("fill", "#e81700")
+          .style('font-size', '25px')
+          .style('stroke', '#fff')
+          .style('stroke-width', 5)
+          .style('stroke-opacity', 0.9)
+          .style('font-weight', 'bold')
+          .text(function(d, i) { return i + 1; });
+        
+        svg.selectAll(".text-up").data(positions)
+        .enter().append("text")
+          .attr("class", "text-up")
+          .attr("x", function(d) { return d[0] / imgWidth * width + 4; })
+          .attr("y", function(d) { return d[1] / imgHeight * height - 4; })
+          .style("fill", "#e81700")
+          .style('font-size', '25px')
+          .text(function(d, i) { return i + 1; });
+
+        svg.selectAll(".dot").data(positions)
+        .enter().append("circle")
+          .attr("class", "dot")
+          .attr("r", 3.5)
+          .attr("cx", function(d) { return d[0] / imgWidth * width; })
+          .attr("cy", function(d) { return d[1] / imgHeight * height; })
+          .style("fill", "#e81700");
+        
+      }
     </script>
   </body>
 </html>

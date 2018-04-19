@@ -52,6 +52,8 @@ def flow(img_path):
     'flow.html',
     tokens=result["tokens"],
     positions=result["positions"].tolist(),
+    img_width=result["img_width"],
+    img_height=result["img_height"],
     img_path=img_path
   )
 
