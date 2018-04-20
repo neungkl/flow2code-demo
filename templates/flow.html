@@ -393,7 +393,9 @@
         var tabsize = 0;
         for (var i = 1; i < positions.length - 1; i++) {
           if (tokens[i] == 'end') tabsize--;
+          if (tokens[i] == 'elseif' || tokens[i] == 'end') tabsize--;
           for (var j = 0; j < tabsize; j++) txt += "&nbsp;&nbsp;&nbsp;&nbsp;";
+          if (tokens[i] == 'elseif' || tokens[i] == 'end') tabsize++;
           if (['if', 'while'].indexOf(tokens[i]) >= 0) tabsize++;
           var token = tokens[i].replace('<', '&lt;').replace('>', '&gt;');
 
@@ -414,7 +416,7 @@
 
           if (token == 'statement') {
             txt += word;
-          } else if (token != 'end') {
+          } else if (token != 'end' && token != 'else') {
             txt += '<b>' + token.toUpperCase() + '</b> ( ' + word + ' )';
           } else {
             txt += '<b>' + token.toUpperCase() + '</b>';
