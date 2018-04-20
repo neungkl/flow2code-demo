@@ -18,7 +18,7 @@ from keras.models import Model
 from keras import backend as K
 import tensorflow as tf
 
-def generate_model():
+def generate_model_small():
   word_input = Input(batch_shape=(BATCH_SIZE, PADDING_SIZE))
   image_input = Input(batch_shape=(BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, 1))
   
@@ -75,8 +75,8 @@ def flow2code(image_path):
 
   if model is None:
     print("Reload model !!!")
-    model = generate_model()
-    model.load_weights("./model/model-weight-test.hdf5")
+    model = generate_model_small()
+    model.load_weights("./model/model-weight.hdf5")
   
   image, img_width, img_height = read_image(image_path)
 

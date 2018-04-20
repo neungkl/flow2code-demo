@@ -125,6 +125,13 @@
           <h3>3. Final Result</h3>
         </div>
       </div>
+      <div class="row">
+        <div class="col mt-3">
+          <div class="final-result border-area p-4">
+            Loading...
+          </div>
+        </div>
+      </div>
       <div class="mb-5">&nbsp;</div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" crossorigin="anonymous"></script>
@@ -189,6 +196,7 @@
         showImagePosition();
         performOCR();
 
+        finalResult();
       });
 
       function showData() {
@@ -294,7 +302,6 @@
           txt += '</tr>';
         }
         $('.ocr-result table tbody').html(txt);
-        // console.log(data, cleanedData);
       }
 
       function showOCRPosition() {
@@ -318,7 +325,7 @@
         svg.selectAll(".block").data(ocrData)
         .enter().append("rect")
           .attr("class", "block")
-          .attr("x", function(d) { console.log(d); return d.x / imgWidth * width; })
+          .attr("x", function(d) { return d.x / imgWidth * width; })
           .attr("y", function(d) { return d.y / imgHeight * height; })
           .attr("width", function(d) { return d.w / imgWidth * width; })
           .attr("height", function(d) { return d.h / imgHeight * height; })
@@ -375,6 +382,50 @@
           .attr("cx", function(d) { return d[0] / imgWidth * width; })
           .attr("cy", function(d) { return d[1] / imgHeight * height; })
           .style("fill", "#e81700");
+      }
+    
+      function finalResult() {
+        if (ocrData == null) {
+          return setTimeout(finalResult, 300);
+        }
+
+        console.log(ocrData);
+
+        var txt = '';
+        var tabsize = 0;
+        for (var i = 1; i < positions.length - 1; i++) {
+          if (tokens[i] == 'end') tabsize--;
+          for (var j = 0; j < tabsize; j++) txt += "&nbsp;&nbsp;&nbsp;&nbsp;";
+          if (['if', 'while'].indexOf(tokens[i]) >= 0) tabsize++;
+          var token = tokens[i].replace('<', '&lt;').replace('>', '&gt;');
+
+          var dist = 999999999;
+          var word = '';
+          for (var j = 0; j < ocrData.length; j++) {
+            var cx = ocrData[j].x + ocrData[j].w / 2;
+            var cy = ocrData[j].y + ocrData[j].h / 2;
+            var x = positions[i][0];
+            var y = positions[i][1];
+
+            var dd = (cx - x) * (cx - x) + (cy - y) * (cy - y);
+            if (dd < dist) {
+              dist = dd;
+              word = ocrData[j].text;
+            }
+          }
+
+          if (token == 'statement') {
+            txt += word;
+          } else if (token != 'end') {
+            txt += token + ' ( ' + word + ' )';
+          } else {
+            txt += token;
+          }
+
+          txt += '<br>';
+        }
+        
+        $('.final-result').html(txt);
       }
     </script>
   </body>
