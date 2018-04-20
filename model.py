@@ -99,6 +99,8 @@ def generate_model():
   model.compile(optimizer=optimizer,
                 loss=['mse', 'categorical_crossentropy'],
                 metrics={'y_position':'mse', 'y_word':'accuracy'})
+  
+  return model
 
 model = None
 
