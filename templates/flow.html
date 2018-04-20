@@ -2,7 +2,7 @@
   <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <style>
-      .main-img, .image-position-wrapper svg {
+      .main-img, .image-position-wrapper svg, .ocr-position-wrapper svg {
         border: 1px solid #333;
       }
       .border-area {
@@ -10,13 +10,27 @@
         background-color: #eee;
         border-radius: 3px;
       }
+      .header-section {
+        background: #111;
+        color: #fff;
+      }
+      .header-section a {
+        color: inherit;
+      }
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-dark bg-primary">
-      <a class="navbar-brand" href="/">Flow2code</a>
-    </nav>
+    <div class="py-3 header-section">
+      <div class="container">
+        <h4><a href="/">Flow2code</a></h4>
+      </div>
+    </div>
     <div class="container my-4">
+      <div class="row my-2">
+        <div class="col">
+          <h3>1. Flow2code Result (Machine Learning Model)</h3>
+        </div>
+      </div>
       <div class="row">
         <div class="col">
           <div class="mb-2"><b>Original Image</b></div>
@@ -71,11 +85,49 @@
               </tbody>
             </table>
           </div>
+
+        </div>
+      </div>
+      <hr class="my-4">
+      <div class="row">
+        <div class="col">
+          <h3>2. OCR</h3>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="mt-3 mb-2"><b>OCR Positions</b></div>
+          <div class="ocr-position-wrapper">
+            <svg id="ocr-position"></svg>
+          </div>
+        </div>
+        <div class="col">
+          <div class="ocr-result mt-3 py-2">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Text</th>
+                  <th>X</th>
+                  <th>Y</th>
+                  <th>Width</th>
+                  <th>Height</th>
+                <tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
+      <hr class="my-4">
+      <div class="row">
+        <div class="col">
+          <h3>3. Final Result</h3>
+        </div>
+      </div>
+      <div class="mb-5">&nbsp;</div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
@@ -87,6 +139,7 @@
       var imgHeight = eval("{{ img_height }}");
       var imgPath = "{{ img_path }}";
       var visionAPIToken = "{{ vision_api_token }}";
+      var ocrData = null;
 
       tokens = `['<START>', 'while', 'statement', 'end', 'statement', 'if', 'statement', 'end', '<END>']`;
       positions = `[[ 86.835884,   30.822842 ],
@@ -134,7 +187,8 @@
         });
 
         showImagePosition();
-        OCR();
+        performOCR();
+
       });
 
       function showData() {
@@ -162,8 +216,115 @@
         $('.positions-result-formatted .table tbody').html(txt);
       }
 
-      function OCR() {
+      function performOCR() {
+        function toDataURL(url, callback) {
+          var xhr = new XMLHttpRequest();
+          xhr.onload = function() {
+            var reader = new FileReader();
+            reader.onloadend = function() {
+              callback(reader.result);
+            }
+            reader.readAsDataURL(xhr.response);
+          };
+          xhr.open('GET', url);
+          xhr.responseType = 'blob';
+          xhr.send();
+        }
 
+        toDataURL('/img/' + imgPath, function(dataUrl) {
+          dataUrl = dataUrl.replace('data:image/jpeg;base64,', '');
+          var reqData = {
+            "requests": [
+              {
+                "image": {
+                  "content": dataUrl
+                },
+                "features": [
+                  {
+                    "type": "TEXT_DETECTION"
+                  }
+                ]
+              }
+            ]
+          };
+
+          initOCRData([{"x":74,"y":28,"w":26,"h":9,"text":"start"},{"x":146,"y":120,"w":14,"h":7,"text":"no"},{"x":65,"y":126,"w":40,"h":15,"text":"eNlXgt"},{"x":214,"y":128,"w":75,"h":13,"text":"bhtCpsUw"},{"x":92,"y":167,"w":20,"h":9,"text":"yes"},{"x":315,"y":221,"w":14,"h":7,"text":"no"},{"x":38,"y":235,"w":84,"h":15,"text":"IfphJLEADM"},{"x":264,"y":268,"w":22,"h":8,"text":"yes"},{"x":238,"y":338,"w":43,"h":13,"text":"hpbNfg"},{"x":249,"y":440,"w":21,"h":9,"text":"end"}]);
+
+          // $.ajax({
+          //   type: "POST",
+          //   url: 'https://vision.googleapis.com/v1/images:annotate?key=' + visionAPIToken,
+          //   data: JSON.stringify(reqData),
+          //   contentType: "application/json; charset=utf-8",
+          //   dataType: 'json',
+          //   success: function(resp) {
+          //     resp = resp["responses"][0]["textAnnotations"];
+          //     // resp.shift();
+          //     var data = resp.map(function(d) {
+          //       var x = d['boundingPoly']['vertices'][0].x;
+          //       var y = d['boundingPoly']['vertices'][0].y;
+          //       var w = d['boundingPoly']['vertices'][2].x - x;
+          //       var h = d['boundingPoly']['vertices'][2].y - y;
+          //       return {
+          //         x: x, y: y, w: w, h: h,
+          //         text: d['description']
+          //       }
+          //     });
+          //     console.log(data);
+          //     // initOCRData(data);
+          //   }
+          // });
+
+        });
+      }
+
+      function initOCRData(data) {
+        var cleanedData = data.filter(function(d) { return d.text != 'yes' && d.text != 'no'; });
+        ocrData = cleanedData;
+
+        showOCRPosition();
+        
+        var txt = '';
+        for (var i = 0; i < ocrData.length; i++) {
+          txt += '<tr>';
+          txt += '<td>' + ocrData[i].text + '</td>';
+          txt += '<td>' + ocrData[i].x + '</td>';
+          txt += '<td>' + ocrData[i].y + '</td>';
+          txt += '<td>' + ocrData[i].w + '</td>';
+          txt += '<td>' + ocrData[i].h + '</td>';
+          txt += '</tr>';
+        }
+        $('.ocr-result table tbody').html(txt);
+        // console.log(data, cleanedData);
+      }
+
+      function showOCRPosition() {
+        var svg = d3.select('#ocr-position');
+
+        var aspect = imgWidth / imgHeight;
+        var targetWidth = Math.min($(".ocr-position-wrapper").width(), imgWidth);
+
+        var width = targetWidth;
+        var height = targetWidth / aspect;
+
+        svg.attr("width", width);
+        svg.attr("height", height);
+        svg.append('svg:image')
+          .attr('xlink:href', '/img/' + imgPath)
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('width', width)
+          .attr('height', height);
+
+        svg.selectAll(".block").data(ocrData)
+        .enter().append("rect")
+          .attr("class", "block")
+          .attr("x", function(d) { console.log(d); return d.x / imgWidth * width; })
+          .attr("y", function(d) { return d.y / imgHeight * height; })
+          .attr("width", function(d) { return d.w / imgWidth * width; })
+          .attr("height", function(d) { return d.h / imgHeight * height; })
+          .style("fill", "none")
+          .style("stroke", "#f00")
+          .style("stroke-width", 2);
       }
 
       function showImagePosition() {
@@ -193,8 +354,8 @@
           .style("fill", "#e81700")
           .style('font-size', '25px')
           .style('stroke', '#fff')
-          .style('stroke-width', 5)
-          .style('stroke-opacity', 0.9)
+          .style('stroke-width', 3)
+          .style('stroke-opacity', 0.8)
           .style('font-weight', 'bold')
           .text(function(d, i) { return i + 1; });
         

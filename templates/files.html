@@ -1,20 +1,41 @@
 <html>
   <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+      .img {
+        max-height: 200px;
+        max-width: 200px;
+        border: 1px solid #fff;
+      }
+      .img:hover {
+        border-color: #333;
+      }
+      .header-section {
+        background: #111;
+        color: #fff;
+      }
+      .header-section a {
+        color: inherit;
+      }
+    </style>
   </head>
   <body>
-    <nav class="navbar navbar-dark bg-primary">
-      <a class="navbar-brand" href="/">Flow2code</a>
-    </nav>
+    <div class="py-5 header-section">
+      <div class="container py-2">
+        <h2><a href="/">Flow2code</a></h2>
+        <div>Generating Program Code From Raw-pixel Flowchart Diagram</div>
+      </div>
+    </div>
     <div class="container mt-4">
       <h3>File List:</h3>
-      <ul>
+      <!-- <ul> -->
         {% for file in files %}
           {% if file != ".gitkeep" %}
-          <li><a href="/flow/{{ file }}">{{ file }}</a></li>
+          <a href="/flow/{{ file }}"><img src="/img/{{ file }}" class="img"></a>
+          <!-- <li><a>{{ file }}</a></li> -->
           {% endif %}
         {% endfor %}
-      </ul>
+      <!-- </ul> -->
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>

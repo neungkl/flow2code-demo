@@ -40,7 +40,9 @@ def upload():
 
 @app.route("/")
 def root():
-  return render_template('index.html')
+  abs_path = os.path.join(os.getcwd(), "upload")
+  files = os.listdir(abs_path)[0:7]
+  return render_template('index.html', files=files)
 
 @app.route("/flow/<img_path>")
 def flow(img_path):
