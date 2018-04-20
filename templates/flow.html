@@ -6,8 +6,8 @@
         border: 1px solid #333;
       }
       .border-area {
-        border: 1px solid #bbb;
-        background-color: #eee;
+        border: 1px solid #ccc;
+        background-color: #f8f8f8;
         border-radius: 3px;
       }
       .header-section {
@@ -148,16 +148,16 @@
       var visionAPIToken = "{{ vision_api_token }}";
       var ocrData = null;
 
-      tokens = `['<START>', 'while', 'statement', 'end', 'statement', 'if', 'statement', 'end', '<END>']`;
-      positions = `[[ 86.835884,   30.822842 ],
- [ 94.26746,   138.4611   ],
- [ 93.41691,   241.86961  ],
- [ -1.2381954,  -1.3295772],
- [273.97653,   145.54604  ],
- [268.79132,   250.06036  ],
- [272.19553,   353.23572  ],
- [ -1.19777,    -1.0979531],
- [253.61102,   452.9816   ]]`;
+//       tokens = `['<START>', 'while', 'statement', 'end', 'statement', 'if', 'statement', 'end', '<END>']`;
+//       positions = `[[ 86.835884,   30.822842 ],
+//  [ 94.26746,   138.4611   ],
+//  [ 93.41691,   241.86961  ],
+//  [ -1.2381954,  -1.3295772],
+//  [273.97653,   145.54604  ],
+//  [268.79132,   250.06036  ],
+//  [272.19553,   353.23572  ],
+//  [ -1.19777,    -1.0979531],
+//  [253.61102,   452.9816   ]]`;
       
       tokens = eval(tokens.split("&#39;").join("'"));
       positions = eval(positions);
@@ -256,31 +256,31 @@
             ]
           };
 
-          initOCRData([{"x":74,"y":28,"w":26,"h":9,"text":"start"},{"x":146,"y":120,"w":14,"h":7,"text":"no"},{"x":65,"y":126,"w":40,"h":15,"text":"eNlXgt"},{"x":214,"y":128,"w":75,"h":13,"text":"bhtCpsUw"},{"x":92,"y":167,"w":20,"h":9,"text":"yes"},{"x":315,"y":221,"w":14,"h":7,"text":"no"},{"x":38,"y":235,"w":84,"h":15,"text":"IfphJLEADM"},{"x":264,"y":268,"w":22,"h":8,"text":"yes"},{"x":238,"y":338,"w":43,"h":13,"text":"hpbNfg"},{"x":249,"y":440,"w":21,"h":9,"text":"end"}]);
+          // initOCRData([{"x":74,"y":28,"w":26,"h":9,"text":"start"},{"x":146,"y":120,"w":14,"h":7,"text":"no"},{"x":65,"y":126,"w":40,"h":15,"text":"eNlXgt"},{"x":214,"y":128,"w":75,"h":13,"text":"bhtCpsUw"},{"x":92,"y":167,"w":20,"h":9,"text":"yes"},{"x":315,"y":221,"w":14,"h":7,"text":"no"},{"x":38,"y":235,"w":84,"h":15,"text":"IfphJLEADM"},{"x":264,"y":268,"w":22,"h":8,"text":"yes"},{"x":238,"y":338,"w":43,"h":13,"text":"hpbNfg"},{"x":249,"y":440,"w":21,"h":9,"text":"end"}]);
 
-          // $.ajax({
-          //   type: "POST",
-          //   url: 'https://vision.googleapis.com/v1/images:annotate?key=' + visionAPIToken,
-          //   data: JSON.stringify(reqData),
-          //   contentType: "application/json; charset=utf-8",
-          //   dataType: 'json',
-          //   success: function(resp) {
-          //     resp = resp["responses"][0]["textAnnotations"];
-          //     // resp.shift();
-          //     var data = resp.map(function(d) {
-          //       var x = d['boundingPoly']['vertices'][0].x;
-          //       var y = d['boundingPoly']['vertices'][0].y;
-          //       var w = d['boundingPoly']['vertices'][2].x - x;
-          //       var h = d['boundingPoly']['vertices'][2].y - y;
-          //       return {
-          //         x: x, y: y, w: w, h: h,
-          //         text: d['description']
-          //       }
-          //     });
-          //     console.log(data);
-          //     // initOCRData(data);
-          //   }
-          // });
+          $.ajax({
+            type: "POST",
+            url: 'https://vision.googleapis.com/v1/images:annotate?key=' + visionAPIToken,
+            data: JSON.stringify(reqData),
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            success: function(resp) {
+              resp = resp["responses"][0]["textAnnotations"];
+              resp.shift();
+              var data = resp.map(function(d) {
+                var x = d['boundingPoly']['vertices'][0].x;
+                var y = d['boundingPoly']['vertices'][0].y;
+                var w = d['boundingPoly']['vertices'][2].x - x;
+                var h = d['boundingPoly']['vertices'][2].y - y;
+                return {
+                  x: x, y: y, w: w, h: h,
+                  text: d['description']
+                }
+              });
+
+              initOCRData(data);
+            }
+          });
 
         });
       }
@@ -389,8 +389,6 @@
           return setTimeout(finalResult, 300);
         }
 
-        console.log(ocrData);
-
         var txt = '';
         var tabsize = 0;
         for (var i = 1; i < positions.length - 1; i++) {
@@ -417,9 +415,9 @@
           if (token == 'statement') {
             txt += word;
           } else if (token != 'end') {
-            txt += token + ' ( ' + word + ' )';
+            txt += '<b>' + token.toUpperCase() + '</b> ( ' + word + ' )';
           } else {
-            txt += token;
+            txt += '<b>' + token.toUpperCase() + '</b>';
           }
 
           txt += '<br>';

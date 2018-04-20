@@ -54,6 +54,52 @@ def generate_model_small():
   
   return model
 
+def generate_model():
+  word_input = Input(batch_shape=(BATCH_SIZE, PADDING_SIZE))
+  image_input = Input(batch_shape=(BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, 1))
+  
+  img = Conv2D(32, (3, 3), padding='same', activation='relu')(image_input)
+  
+  img = MaxPooling2D()(img)
+  img = Conv2D(64, (3,3), padding='same', activation='relu')(img)
+  
+  img = MaxPooling2D()(img)
+  img = Conv2D(92, (3,3), padding='same', activation='relu')(img)
+  
+  img = MaxPooling2D()(img)
+  img = Conv2D(128, (3,3), padding='same', activation='relu')(img)
+  
+  img = MaxPooling2D()(img)
+  img = Conv2D(192, (3,3), padding='same', activation='relu')(img)
+  
+  img = MaxPooling2D()(img)
+  img = Conv2D(224, (3,3), padding='same', activation='relu')(img)
+  
+  img = Flatten()(img)
+  img = Dense(2048)(img)
+  img = RepeatVector(PADDING_SIZE)(img)
+  
+  w = Embedding(N_ONEHOT_WORD, 64)(word_input)
+  w = LSTM(512, return_sequences=True)(w)
+  w = LSTM(512, return_sequences=True)(w)
+  
+  x = Concatenate()([w, img])
+  x = LSTM(512, return_sequences=True)(x)
+  x = LSTM(512)(x)
+  
+  y = Dense(512)(x)
+  y = Dense(N_ONEHOT_WORD, activation='softmax', name='y_word')(y)
+  
+  y_pos = Dense(512)(x)
+  y_pos = Dense(2, name='y_position')(y_pos)
+
+  optimizer = Adam(lr=0.0001)
+  model = Model(inputs=[word_input, image_input], outputs=[y_pos, y])
+  
+  model.compile(optimizer=optimizer,
+                loss=['mse', 'categorical_crossentropy'],
+                metrics={'y_position':'mse', 'y_word':'accuracy'})
+
 model = None
 
 def convert_to_feature_list(feature_words):
