@@ -240,7 +240,7 @@
         }
 
         toDataURL('/img/' + imgPath, function(dataUrl) {
-          dataUrl = dataUrl.replace('data:image/jpeg;base64,', '').replace('data:image/png;base64,');
+          dataUrl = dataUrl.replace('data:image/jpeg;base64,', '').replace('data:image/png;base64,', '');
           var reqData = {
             "requests": [
               {
